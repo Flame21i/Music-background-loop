@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1024">
+    <title>Music Loop App</title>
+    <style>
+        :root {
+            --background-dark: #121212;
+            --background-light: #ffffff;
+            --text-dark: #ffffff;
+            --text-light: #000000;
+            --button-bg: #1e1e1e;
+            --button-bg-hover: #333333;
+            --highlight-color: #ff5722;
+            --stopped-highlight: #c23e16; 
+        }
+        *{
+            scroll-behavior: smooth;
+            margin: 0;
+            padding: 0;
+            outline: none;
+            font-family: Helvetica,Arial, sans-serif;
+            transition: .3s;
+        }
+        body::-webkit-scrollbar{
+            background-color: transparent;
+            position: absolute;
+            transform: 0.3s;
+            scroll-behavior: smooth;
+        }
+        body::-webkit-scrollbar-thumb{
+            position: absolute;
+            background-color: #666;
+            scroll-behavior: smooth;
+        }
+        body::-webkit-scrollbar-track{
+            position: absolute;
+        }
+        body {
+            background-color: var(--background-dark);
+            color: var(--text-dark);
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            scroll-behavior: smooth;
+            padding-bottom: 100px; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 70px;
+        }
+        h1{
+            background: linear-gradient(to right ,var(--highlight-color), var(--button-bg-hover));
+            color: transparent;
+            background-clip: text;
+            position: absolute;
+            left: 20px;
+            top: 30px
+        }
+        button {
+            margin: 10px;
+            padding: 10px 9px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--button-bg);
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100px; 
+        }
+        input{
+            margin: 10px;
+            padding: 10px 9px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: var(--button-bg);
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: 0.3s;
+            width: 60px; 
+            align-self: flex-start;
+        }
+
+        button:hover {
+            background-color: var(--button-bg-hover);
+        }
+
+        .music-list {
+            margin-top: 20px;
+            text-align: left;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            margin: 20px auto; 
+        }
+        .music-item {
+            display: flex;
+            justify-content: space-between; 
+            align-items: center; 
+            margin: 5px 0px; 
+            padding: 5px;
+            padding-left: 20px;
+            background-color: var(--button-bg);
+            border-radius: 5px; 
+            transition: 0.3s;
+        }
+        .music-item:hover{
+            background-color: var(--button-bg-hover);
+            transform: translate(-4px);
+            border-left: var(--highlight-color);
+        }
+        .music-item.highlight {
+            background-color: var(--highlight-color);
+            transform: translate(-12px);
+            position: sticky;
+            top: 30px;
+            bottom: 95px;
+            z-index: 2;
+        }
+
+        .music-item.stopped {
+            background-color: var(--stopped-highlight); 
+            transform: translate(-6px);
+            position: sticky;
+            top: 30px;
+            bottom: 95px;
+            z-index: 2;
+        }
+
+        .controls {
+            position: fixed; 
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: #3b3b3b38;
+            backdrop-filter: blur(15px);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            overflow: auto;
+            align-items: center; 
+            z-index: 1000;
+        }
+
+        .progress-container {
+            display: flex;
+            justify-content: center;
+            align-items: center; 
+            min-width: 700px;
+            width: 100%;
+            margin: 0 10px; 
+        }
+
+        .progress-bar {
+            position: relative;
+            width: 100%; 
+            height: 38px;
+            background-color: var(--button-bg);
+            border-radius: 5px; 
+            margin: 0 10px; 
+            overflow: hidden; 
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--stopped-highlight), var(--highlight-color));
+            width: 0; 
+        }
+        .time-lapse {
+            font-size: 14px;
+            margin: 0 10px; 
+        }
+        .toggle-mode {
+            background-color: var(--highlight-color);
+            color: var(--text-dark);
+            padding: 9px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s;
+        }
+
+        .toggle-mode:hover {
+            background-color: var(--stopped-highlight); 
+        }
+
+        .left-controls {
+            display: flex; 
+            align-items: center; 
+        }
+        .fixedupdiv{
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            top: 20px;
+            right: 20px;
+            z-index: 1;
+        }
+        #toggleMode{
+            order: -1;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .add-music-button{
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .queueButton{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            width: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Background Music App</h1>
+    <div class="fixedupdiv">    
+        <button title="Add Music" class="sticky-add-music add-music-button" id="addMusic"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 48 48"><mask id="ipTAddMusic0"><g fill="none" stroke="#fff" stroke-linejoin="round" stroke-width="4"><path stroke-linecap="round" d="M24 44C12.954 44 4 35.046 4 24S12.954 4 24 4s20 8.954 20 20"/><path fill="#555" d="M20 24v-6.928l6 3.464L32 24l-6 3.464l-6 3.464V24Z"/><path stroke-linecap="round" d="M37.05 32v10M42 36.95H32"/></g></mask><path fill="currentColor" d="M0 0h48v48H0z" mask="url(#ipTAddMusic0)"/></svg></button>
+        <button title="Theme" class="toggle-mode" id="toggleMode"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M7.5 2c-1.79 1.15-3 3.18-3 5.5s1.21 4.35 3.03 5.5C4.46 13 2 10.54 2 7.5A5.5 5.5 0 0 1 7.5 2m11.57 1.5l1.43 1.43L4.93 20.5L3.5 19.07L19.07 3.5m-6.18 2.43L11.41 5L9.97 6l.42-1.7L9 3.24l1.75-.12l.58-1.65L12 3.1l1.73.03l-1.35 1.13l.51 1.67m-3.3 3.61l-1.16-.73l-1.12.78l.34-1.32l-1.09-.83l1.36-.09l.45-1.29l.51 1.27l1.36.03l-1.05.87l.4 1.31M19 13.5a5.5 5.5 0 0 1-5.5 5.5c-1.22 0-2.35-.4-3.26-1.07l7.69-7.69c.67.91 1.07 2.04 1.07 3.26m-4.4 6.58l2.77-1.15l-.24 3.35l-2.53-2.2m4.33-2.7l1.15-2.77l2.2 2.54l-3.35.23m1.15-4.96l-1.14-2.78l3.34.24l-2.2 2.54M9.63 18.93l2.77 1.15l-2.53 2.19l-.24-3.34Z"/></svg></button>
+    </div>
+
+    <div class="music-list" id="musicList"></div>
+    <div class="controls">
+        <div class="progress-container">
+            <div class="left-controls">
+                <label title="Amount of times to loop" for="loopCount"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><g id="feLoop0" fill="none" fill-rule="evenodd" stroke="none" stroke-width="1"><g id="feLoop1" fill="currentColor"><path id="feLoop2" d="M6.876 15.124A6.002 6.002 0 0 0 17.658 14h2.09a8.003 8.003 0 0 1-14.316 2.568L3 19v-6h6l-2.124 2.124Zm10.249-6.249A6.004 6.004 0 0 0 6.34 10H4.25a8.005 8.005 0 0 1 14.32-2.57L21 5v6h-6l2.125-2.125Z"/></g></g></svg></label>
+                <input type="number" id="loopCount" value="3" min="1">
+            </div>
+
+            <button title="Previous Song" class="queueButton" id="prevMusic"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14m3-6.25a.75.75 0 0 0 0-1.5H6.81l.72-.72a.75.75 0 0 0-1.06-1.06l-2 2a.75.75 0 0 0 0 1.06l2 2a.75.75 0 1 0 1.06-1.06l-.72-.72z" clip-rule="evenodd"/></svg></button> <!-- Previous button -->
+            <div class="time-lapse" id="timeLapse">0:00</div>
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="time-lapse" id="totalTimeLapse">0:00</div>
+            <button title="Next Song" class="queueButton" id="nextMusic"><svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 16 16"><path fill="currentColor" fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14M5 7.25a.75.75 0 0 0 0 1.5h4.19l-.72.72a.75.75 0 0 0 1.06 1.06l2-2a.75.75 0 0 0 0-1.06l-2-2a.75.75 0 0 0-1.06 1.06l.72.72z" clip-rule="evenodd"/></svg><!-- Next button -->
+            </div>
+    </div>  
+    <script>
+        if (window.innerWidth < 1024) {
+            document.querySelector('meta[name="viewport"]').setAttribute('content', 'width=1024');
+        }
+        const musics = [];
+        let currentTrack = 0;
+        let totalLoops = 1; 
+        let currentLoop = 0; 
+        let isPlaying = false;
+        let isDarkMode = true;
+        let updateInterval;
+    
+
+        document.getElementById('toggleMode').onclick = function() {
+            isDarkMode = !isDarkMode;
+            const body = document.body;
+            const toggleButton = this;
+            if (isDarkMode) {
+                document.documentElement.style.setProperty('--background-dark', '#121212');
+                document.documentElement.style.setProperty('--highlight-color', '#ff5722');
+                document.documentElement.style.setProperty('--stopped-highlight', '#c23e16');
+                document.documentElement.style.setProperty('--button-bg', '#1e1e1e');
+                document.documentElement.style.setProperty('--button-bg-hover', '#333333');
+                document.documentElement.style.setProperty('--text-dark', '#ffffff');
+            } else {
+                document.documentElement.style.setProperty('--highlight-color', '#0068ee');
+                document.documentElement.style.setProperty('--stopped-highlight', '#0058ce');
+                document.documentElement.style.setProperty('--background-dark', '--background-light');
+                document.documentElement.style.setProperty('--text-dark', '--text-light');
+                document.documentElement.style.setProperty('--button-bg', '#eee');
+                document.documentElement.style.setProperty('--button-bg-hover', '#ddd');
+            }
+        };
+    
+        document.getElementById('addMusic').onclick = function() {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'audio/*';
+            fileInput.multiple = true;
+            fileInput.onchange = function() {
+                const files = fileInput.files;
+                if (files.length > 0) {
+                    for (const file of files) {
+                        const url = URL.createObjectURL(file);
+                        musics.push(new Audio(url));
+                        displayMusicList(file.name, url);
+                    }
+                }
+            };
+            fileInput.click();
+        };
+    
+        function displayMusicList(fileName, fileUrl) {
+            const musicList = document.getElementById('musicList');
+            const musicItem = document.createElement('div');
+            musicItem.className = 'music-item';
+            const trackName = document.createElement('span');
+            trackName.innerText = fileName;
+            musicItem.appendChild(trackName);
+    
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'button-container';
+    
+            const toggleButton = document.createElement('button');
+            toggleButton.innerText = 'Play';
+            toggleButton.className = 'toggle-button';
+            toggleButton.onclick = function() {
+                const index = musics.findIndex(music => music.src === fileUrl);
+                togglePlayState(index, toggleButton);
+            };
+    
+            const removeButton = document.createElement('button');
+            removeButton.innerText = 'Remove';
+            removeButton.className = 'remove-button';
+            removeButton.onclick = function() {
+                const index = musics.findIndex(music => music.src === fileUrl);
+                if (currentTrack === index && isPlaying) {
+                    EstopCurrentTrack();
+                }
+                musics.splice(index, 1);
+                musicList.removeChild(musicItem);
+                currentTrack = (currentTrack >= musics.length) ? 0 : currentTrack;
+                if (musics.length > 0) {
+                    playCurrentTrack();
+                }
+                updateToggleButtonText();
+            };
+    
+            buttonContainer.appendChild(toggleButton);
+            buttonContainer.appendChild(removeButton);
+            musicItem.appendChild(buttonContainer);
+            musicList.appendChild(musicItem);
+        }
+    
+        function playCurrentTrack() {
+            if (musics[currentTrack]) {
+                musics[currentTrack].play();
+                totalLoops = document.getElementById('loopCount').value || 1;
+                currentLoop = 0; 
+                isPlaying = true;
+                updateInterval = setInterval(() => {
+                    updateProgressBar();
+                    updateTimeLapse();
+                    checkIfTrackFinished(); 
+                }, 10);
+                highlightToggleButton();
+            }
+        }
+    
+        function checkIfTrackFinished() {
+            const currentAudio = musics[currentTrack];
+            if (currentAudio.ended) {
+                currentLoop++;
+                if (currentLoop < totalLoops) {
+                    currentAudio.currentTime = 0;
+                    currentAudio.play(); 
+                } else {
+                    moveToNextTrack(); 
+                }
+            }
+        }
+    
+        function moveToNextTrack() {
+            EstopCurrentTrack();
+            currentTrack = (currentTrack < musics.length - 1) ? currentTrack + 1 : 0; 
+            playCurrentTrack();
+            updateToggleButtonText();
+        }
+    
+        function EstopCurrentTrack() {
+            if (musics[currentTrack]) {
+                musics[currentTrack].pause();
+                musics[currentTrack].currentTime = 0;
+                isPlaying = false;
+                clearInterval(updateInterval);
+                updateProgressBar();
+                updateTimeLapse();
+                highlightToggleButton();
+            }
+        }
+        function stopCurrentTrack() {
+            if (musics[currentTrack]) {
+                musics[currentTrack].pause();
+                isPlaying = false;
+                clearInterval(updateInterval);
+                updateProgressBar();
+                updateTimeLapse();
+                highlightToggleButton();
+            }
+        }
+        function togglePlayState(trackIndex, toggleButton) {
+            if (isPlaying && currentTrack === trackIndex) {
+                stopCurrentTrack();
+                toggleButton.innerText = 'Play';
+            } else {
+                if (currentTrack !== trackIndex) {
+                    EstopCurrentTrack();
+                    currentTrack = trackIndex;
+                }
+                playCurrentTrack();
+                toggleButton.innerText = 'Stop';
+            }
+            updateToggleButtonText();
+        }
+    
+        function updateToggleButtonText() {
+            const toggleButtons = document.querySelectorAll('.toggle-button');
+            toggleButtons.forEach((button, index) => {
+                if (index === currentTrack && isPlaying) {
+                    button.innerText = 'Stop';
+                    button.closest('.music-item').classList.remove('stopped');
+                } else if (index === currentTrack && !isPlaying) {
+                    button.innerText = 'Play';
+                    button.closest('.music-item').classList.add('stopped');
+                } else {
+                    button.innerText = 'Play';
+                    button.closest('.music-item').classList.remove('stopped');
+                }
+            });
+        }
+    
+        document.getElementById('prevMusic').onclick = function() {
+            if (musics.length > 0) {
+                EstopCurrentTrack();
+                currentTrack = (currentTrack > 0) ? currentTrack - 1 : musics.length - 1;
+                playCurrentTrack();
+                updateToggleButtonText();
+            }
+        };
+    
+        document.getElementById('nextMusic').onclick = function() {
+            if (musics.length > 0) {
+                moveToNextTrack();
+            }
+        };
+    
+        function highlightToggleButton() {
+            const musicItems = document.querySelectorAll('.music-item');
+            musicItems.forEach((item, index) => {
+                item.classList.toggle('highlight', index === currentTrack && isPlaying);
+            });
+        }
+    
+        function updateProgressBar() {
+            const progressFill = document.getElementById('progressFill');
+            if (musics[currentTrack]) {
+                const currentTime = musics[currentTrack].currentTime;
+                const duration = musics[currentTrack].duration;
+                if (duration > 0) {
+                    const progress = (currentTime / duration) * 100;
+                    progressFill.style.width = `${progress}%`;
+                }
+            }
+        }
+    
+        function updateTimeLapse() {
+            const timeLapse = document.getElementById('timeLapse');
+            const totalTimeLapse = document.getElementById('totalTimeLapse');
+            if (musics[currentTrack]) {
+                const currentTime = musics[currentTrack].currentTime;
+                const duration = musics[currentTrack].duration;
+                const formattedCurrentTime = formatTime(currentTime);
+                const formattedDuration = formatTime(duration);
+                timeLapse.innerText = formattedCurrentTime;
+                totalTimeLapse.innerText = `${formattedDuration}`;
+            }
+        }
+    
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+    
+        document.getElementById('progressBar').onclick = function(event) {
+            const progressBar = this;
+            const rect = progressBar.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const progress = clickX / rect.width;
+            if (musics[currentTrack]) {
+                const duration = musics[currentTrack].duration;
+                musics[currentTrack].currentTime = progress * duration;
+                updateTimeLapse();
+            }
+        };
+    </script>
+    
+</body>
+</html>
